@@ -1,0 +1,94 @@
+diff -ur SGDK-orig/makefile.gen SGDK/makefile.gen
+--- SGDK-orig/makefile.gen	2021-03-12 23:26:53.000000000 +0100
++++ SGDK/makefile.gen	2021-03-12 23:26:53.000000000 +0100
+@@ -5,7 +5,7 @@
+     GDK := $(patsubst %/,%,$(MAKEFILE_DIR))
+ endif
+ 
+-BIN := $(GDK)/bin
++BIN := /opt/sgdk/bin
+ LIB := $(GDK)/lib
+ 
+ LIBSRC := $(GDK)/src
+@@ -16,21 +16,20 @@
+ RES := res
+ INCLUDE := inc
+ 
+-SHELL := $(BIN)/sh
+-RM := $(BIN)/rm
+-CP := $(BIN)/cp
+-CC := $(BIN)/gcc
+-LD := $(BIN)/ld
+-NM := $(BIN)/nm
++RM := rm
++CP := cp
++CC := $(BIN)/m68k-elf-gcc
++LD := $(BIN)/m68k-elf-ld
++NM := $(BIN)/m68k-elf-nm
+ JAVA := java
+ ECHO := echo
+-OBJCPY := $(BIN)/objcopy
++OBJCPY := $(BIN)/m68k-elf-objcopy
+ ASMZ80 := $(BIN)/sjasm
+ MACCER := $(BIN)/mac68k
+ SIZEBND := $(BIN)/sizebnd
+ BINTOS := $(BIN)/bintos
+-RESCOMP := $(JAVA) -jar $(BIN)/rescomp.jar
+-MKDIR := $(BIN)/mkdir
++RESCOMP := $(BIN)/rescomp
++MKDIR := mkdir
+ 
+ SRC_C = $(wildcard *.c)
+ SRC_C += $(wildcard $(SRC)/*.c)
+diff -ur SGDK-orig/makelib.gen SGDK/makelib.gen
+--- SGDK-orig/makelib.gen	2021-03-12 23:26:53.000000000 +0100
++++ SGDK/makelib.gen	2021-03-12 23:26:53.000000000 +0100
+@@ -5,26 +5,25 @@
+     GDK := $(patsubst %/,%,$(MAKEFILE_DIR))
+ endif
+ 
+-BIN := $(GDK)/bin
++BIN := /opt/sgdk/bin
+ LIB := $(GDK)/lib
+ 
+ SRC_LIB := $(GDK)/src
+ RES_LIB := $(GDK)/res
+ INCLUDE_LIB := $(GDK)/inc
+ 
+-SHELL := $(BIN)/sh
+-RM := $(BIN)/rm
+-CP := $(BIN)/cp
+-AR := $(BIN)/ar
+-CC := $(BIN)/gcc
++RM := rm
++CP := cp
++AR := $(BIN)/m68k-elf-ar
++CC := $(BIN)/m68k-elf-gcc
+ JAVA := java
+ ECHO := echo
+-OBJCPY := $(BIN)/objcopy
++OBJCPY := $(BIN)/m68k-elf-objcopy
+ ASMZ80 := $(BIN)/sjasm
+ SIZEBND := $(BIN)/sizebnd
+ BINTOS := $(BIN)/bintos
+-RESCOMP := $(JAVA) -jar $(BIN)/rescomp.jar
+-MKDIR := $(BIN)/mkdir
++RESCOMP := rescomp
++MKDIR := mkdir
+ 
+ SRC_LIB_C := $(wildcard $(SRC_LIB)/*.c)
+ SRC_LIB_S := $(wildcard $(SRC_LIB)/*.s)
+@@ -101,11 +100,11 @@
+ 
+ 
+ $(LIB)/libmd.a: cmd_
+-	$(AR) rs $(LIB)/libmd.a --plugin=liblto_plugin-0.dll @cmd_
++	$(AR) rs $(LIB)/libmd.a --plugin=/opt/sgdk/libexec/gcc/m68k-elf/9.3.0/liblto_plugin.so @cmd_
+ 	$(RM) cmd_
+ 
+ $(LIB)/libmd_debug.a: cmd_
+-	$(AR) rs $(LIB)/libmd_debug.a --plugin=liblto_plugin-0.dll @cmd_
++	$(AR) rs $(LIB)/libmd_debug.a --plugin=/opt/sgdk/libexec/gcc/m68k-elf/9.3.0/liblto_plugin.so @cmd_
+ 	$(RM) cmd_
+ 
+ cmd_ : $(OBJ_LIB)

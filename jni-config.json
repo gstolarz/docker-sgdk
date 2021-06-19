@@ -1,0 +1,91 @@
+[
+{
+  "name":"java.awt.image.BufferedImage",
+  "fields":[
+    {"name":"colorModel"},
+    {"name":"imageType"},
+    {"name":"raster"}
+  ],
+  "methods":[
+    {"name":"getRGB","parameterTypes":["int","int","int","int","int[]","int","int"] },
+    {"name":"setRGB","parameterTypes":["int","int","int","int","int[]","int","int"] }
+  ]
+},
+{
+  "name":"java.awt.image.ColorModel",
+  "fields":[
+    {"name":"colorSpace"},
+    {"name":"colorSpaceType"},
+    {"name":"isAlphaPremultiplied"},
+    {"name":"is_sRGB"},
+    {"name":"nBits"},
+    {"name":"numComponents"},
+    {"name":"pData"},
+    {"name":"supportsAlpha"},
+    {"name":"transparency"}
+  ],
+  "methods":[{"name":"getRGBdefault","parameterTypes":[] }]
+},
+{
+  "name":"java.awt.image.IndexColorModel",
+  "fields":[
+    {"name":"map_size"},
+    {"name":"rgb"},
+    {"name":"transparent_index"}
+  ]
+},
+{
+  "name":"java.awt.image.Raster",
+  "fields":[
+    {"name":"dataBuffer"},
+    {"name":"height"},
+    {"name":"minX"},
+    {"name":"minY"},
+    {"name":"numBands"},
+    {"name":"numDataElements"},
+    {"name":"sampleModel"},
+    {"name":"sampleModelTranslateX"},
+    {"name":"sampleModelTranslateY"},
+    {"name":"width"}
+  ]
+},
+{
+  "name":"java.awt.image.SampleModel",
+  "fields":[
+    {"name":"height"},
+    {"name":"width"}
+  ],
+  "methods":[
+    {"name":"getPixels","parameterTypes":["int","int","int","int","int[]","java.awt.image.DataBuffer"] },
+    {"name":"setPixels","parameterTypes":["int","int","int","int","int[]","java.awt.image.DataBuffer"] }
+  ]
+},
+{
+  "name":"java.lang.ClassLoader",
+  "methods":[{"name":"getPlatformClassLoader","parameterTypes":[] }]
+},
+{
+  "name":"sun.awt.image.ByteComponentRaster",
+  "fields":[
+    {"name":"data"},
+    {"name":"dataOffsets"},
+    {"name":"pixelStride"},
+    {"name":"scanlineStride"},
+    {"name":"type"}
+  ]
+},
+{
+  "name":"sun.awt.image.BytePackedRaster",
+  "fields":[
+    {"name":"data"},
+    {"name":"dataBitOffset"},
+    {"name":"pixelBitStride"},
+    {"name":"scanlineStride"},
+    {"name":"type"}
+  ]
+},
+{
+  "name":"sun.java2d.Disposer",
+  "methods":[{"name":"addRecord","parameterTypes":["java.lang.Object","long","long"] }]
+}
+]
