@@ -3,9 +3,6 @@ name: Deploy
 on:
  workflow_dispatch:
     inputs:
-        dockerusername:
-            default: "gstolarz"
-            description: "Docker hub username"
         sgdkversion:
           default: "1.90"
           description: "SGDK Version"
@@ -44,7 +41,7 @@ jobs:
       - name: Build and Deploy
         run: |
             make build push \
-            DOCKER_USERNAME=${{ github.event.inputs.dockerusername }} \
+            DOCKER_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
             SGDK_VERSION=${{ github.event.inputs.sgdkversion }} \
             BINUTILS_VERSION=${{ github.event.inputs.binutilsversion }} \
             GCC_VERSION=${{ github.event.inputs.gccversion }} \
