@@ -1,0 +1,48 @@
+name: Deploy
+
+on:
+ workflow_dispatch:
+    inputs:
+        sgdkversion:
+          default: "1.90"
+          description: "SGDK Version"
+        binutilsversion:
+            default: "2.41"
+            description: "BinUtils Version"
+        gccversion:
+            default: "13.2.0"
+            description: "GCC Version"
+        newlibversion:
+            default: "4.1.0"
+            description: "NewLib Version"
+
+
+jobs:
+  build:
+    name: Deploy - SGDK v${{ github.event.inputs.sgdkversion }}
+    runs-on: ubuntu-latest
+    environment: DockerHub
+
+    steps:
+
+      # Checkout
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+          path: .
+    
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Deploy
+        run: |
+            make build push \
+            DOCKER_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
+            SGDK_VERSION=${{ github.event.inputs.sgdkversion }} \
+            BINUTILS_VERSION=${{ github.event.inputs.binutilsversion }} \
+            GCC_VERSION=${{ github.event.inputs.gccversion }} \
+            NEWLIB_VERSION=${{ github.event.inputs.newlibversion }}

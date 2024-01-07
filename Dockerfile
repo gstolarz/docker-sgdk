@@ -1,19 +1,17 @@
 FROM ubuntu AS build-gcc
 
-RUN apt-get update \
-  && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-    dos2unix file g++ make patch texinfo unzip wget \
+RUN apt update \
+  && DEBIAN_FRONTEND=noninteractive \
+  apt install -y dos2unix file g++ make texinfo unzip wget bzip2 \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src
 
-COPY *.patch /usr/src
-
-ARG BINUTILS_VERSION=2.36.1
-ARG GCC_VERSION=9.3.0
+ARG BINUTILS_VERSION=2.41
+ARG GCC_VERSION=13.2.0
 ARG NEWLIB_VERSION=4.1.0
 
-ARG SGDK_VERSION=1.62
+ARG SGDK_VERSION=1.90
 
 RUN wget https://ftp.gnu.org/pub/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz \
   && tar xfz binutils-${BINUTILS_VERSION}.tar.gz \
@@ -90,7 +88,6 @@ RUN wget https://github.com/kubilus1/gendev/raw/master/tools/files/sjasm39g6.zip
 RUN wget https://github.com/Stephane-D/SGDK/archive/v${SGDK_VERSION}.tar.gz -O sgdk-${SGDK_VERSION}.tar.gz \
   && tar xfz sgdk-${SGDK_VERSION}.tar.gz \
   && mv SGDK-${SGDK_VERSION} SGDK \
-  && patch -p0 < sgdk.patch \
   && cd SGDK \
   && find . -type f \( -name \*.c -o -name \*.h -o -name \*.i -o -name \*.ld -o -name \*.res -o -name \*.s -o -name \*.i80 -o -name \*.s80 \) -exec dos2unix {} \;
 
@@ -98,15 +95,15 @@ RUN cd SGDK/tools/bintos/src \
   && gcc -s -O2 -Wall -o bintos bintos.c \
   && cp bintos /opt/sgdk/bin
 
-RUN cd SGDK/tools/sizebnd/src \
-  && gcc -s -O2 -Wall -o sizebnd sizebnd.c \
-  && cp sizebnd /opt/sgdk/bin
+# RUN cd SGDK/tools/sizebnd/src \
+#   && gcc -s -O2 -Wall -o sizebnd sizebnd.c \
+#   && cp sizebnd /opt/sgdk/bin
 
 RUN cd SGDK/tools/xgmtool/src \
   && gcc -s -O2 -Wall -o xgmtool *.c -I../inc -lm \
   && cp xgmtool /opt/sgdk/bin
 
-FROM ghcr.io/graalvm/graalvm-ce AS build-graalvm
+FROM ghcr.io/graalvm/graalvm-ce:ol8-java17 AS build-graalvm
 
 RUN gu install native-image
 
@@ -119,12 +116,12 @@ COPY *.json /usr/src/configs/
 RUN cd SGDK/bin \
   && native-image --no-fallback --static -jar apj.jar \
   && native-image --no-fallback --static -jar lz4w.jar \
-  && native-image --no-fallback --static -H:ConfigurationFileDirectories=/usr/src/configs -jar rescomp.jar
+  && native-image --no-fallback --static --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=/usr/src/configs -jar rescomp.jar
 
 FROM ubuntu AS build-upx
 
-RUN apt-get update \
-  && apt-get install -y upx \
+RUN apt update \
+  && apt install -y upx \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /usr/src
@@ -140,8 +137,8 @@ RUN cd SGDK/bin \
 
 FROM ubuntu AS build-sgdk
 
-RUN apt-get update \
-  && apt-get install -y make \
+RUN apt update \
+  && apt install -y make openjdk-17-jre-headless \
   && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-gcc /opt/sgdk /opt/sgdk
@@ -162,8 +159,8 @@ RUN cd SGDK \
 
 FROM ubuntu
 
-RUN apt-get update \
-  && apt-get install -y make \
+RUN apt update \
+  && apt install -y make \
   && rm -rf /var/lib/apt/lists/*
 
 COPY --from=build-sgdk /opt/sgdk /opt/sgdk

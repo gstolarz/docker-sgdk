@@ -1,17 +1,15 @@
-FROM alpine:3.13 AS build-gcc
+FROM alpine AS build-gcc
 
 RUN apk add --update --no-cache \
-    dos2unix file g++ make patch texinfo unzip wget
+    dos2unix file g++ make texinfo unzip wget
 
 WORKDIR /usr/src
 
-COPY *.patch /usr/src
-
-ARG BINUTILS_VERSION=2.36.1
-ARG GCC_VERSION=9.3.0
+ARG BINUTILS_VERSION=2.41
+ARG GCC_VERSION=13.2.0
 ARG NEWLIB_VERSION=4.1.0
 
-ARG SGDK_VERSION=1.62
+ARG SGDK_VERSION=1.90
 
 RUN wget https://ftp.gnu.org/pub/gnu/binutils/binutils-${BINUTILS_VERSION}.tar.gz \
   && tar xfz binutils-${BINUTILS_VERSION}.tar.gz \
@@ -88,7 +86,6 @@ RUN wget https://github.com/kubilus1/gendev/raw/master/tools/files/sjasm39g6.zip
 RUN wget https://github.com/Stephane-D/SGDK/archive/v${SGDK_VERSION}.tar.gz -O sgdk-${SGDK_VERSION}.tar.gz \
   && tar xfz sgdk-${SGDK_VERSION}.tar.gz \
   && mv SGDK-${SGDK_VERSION} SGDK \
-  && patch -p0 < sgdk.patch \
   && cd SGDK \
   && find . -type f \( -name \*.c -o -name \*.h -o -name \*.i -o -name \*.ld -o -name \*.res -o -name \*.s -o -name \*.i80 -o -name \*.s80 \) -exec dos2unix {} \;
 
@@ -96,15 +93,15 @@ RUN cd SGDK/tools/bintos/src \
   && gcc -s -O2 -Wall -o bintos bintos.c \
   && cp bintos /opt/sgdk/bin
 
-RUN cd SGDK/tools/sizebnd/src \
-  && gcc -s -O2 -Wall -o sizebnd sizebnd.c \
-  && cp sizebnd /opt/sgdk/bin
+# RUN cd SGDK/tools/sizebnd/src \
+#   && gcc -s -O2 -Wall -o sizebnd sizebnd.c \
+#   && cp sizebnd /opt/sgdk/bin
 
 RUN cd SGDK/tools/xgmtool/src \
   && gcc -s -O2 -Wall -o xgmtool *.c -I../inc -lm \
   && cp xgmtool /opt/sgdk/bin
 
-FROM ghcr.io/graalvm/graalvm-ce AS build-graalvm
+FROM ghcr.io/graalvm/graalvm-ce:ol8-java17 AS build-graalvm
 
 RUN gu install native-image
 
@@ -117,9 +114,9 @@ COPY *.json /usr/src/configs/
 RUN cd SGDK/bin \
   && native-image --no-fallback --static -jar apj.jar \
   && native-image --no-fallback --static -jar lz4w.jar \
-  && native-image --no-fallback --static -H:ConfigurationFileDirectories=/usr/src/configs -jar rescomp.jar
+  && native-image --no-fallback --static --report-unsupported-elements-at-runtime -H:ConfigurationFileDirectories=/usr/src/configs -jar rescomp.jar
 
-FROM alpine:3.13 AS build-upx
+FROM alpine AS build-upx
 
 RUN apk add --update --no-cache upx
 
@@ -134,9 +131,9 @@ RUN cd SGDK/bin \
   && mkdir -p /opt/sgdk/bin \
   && cp apj lz4w rescomp /opt/sgdk/bin
 
-FROM alpine:3.13 AS build-sgdk
+FROM alpine AS build-sgdk
 
-RUN apk add --update --no-cache libstdc++ make
+RUN apk add --update --no-cache libstdc++ make openjdk17-jre-headless
 
 COPY --from=build-gcc /opt/sgdk /opt/sgdk
 COPY --from=build-upx /opt/sgdk /opt/sgdk
@@ -154,7 +151,7 @@ RUN cd SGDK \
   && rm lib/libgcc.a res/libres.d \
   && cp -r inc lib res md.ld /opt/sgdk
 
-FROM alpine:3.13
+FROM alpine
 
 RUN apk add --update --no-cache libstdc++ make
 
